@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Регистрация</title>
+</head>
+
+<body>
+    <header>
+        <h1 class="d-flex justify-content-center text-center white">Санкт-Петербургское государственное бюджетное
+            профессиональное образовательное учреждение "Политехнический колледж
+            городского хозяйства"</h1>
+    </header>
+    <main style="min-height: 90vh;">
+        <h3 class="d-flex justify-content-center white">РЕГИСТРАЦИЯ</h3>
+        <form action="profile.php" method="POST" id="registerForm" novalidate>
+            <fieldset>
+                <div class="mt-1">
+                    <div class="d-flex">
+                        <p class="flex-row mr-2 mt-0 mb-0">ФИО:</p>
+                        <input
+                            pattern="^[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?(?:\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?)?$"
+                            name="fullname" class='f flex-row p-0' placeholder="Фамилия Имя Отчество" required>
+                    </div>
+                    <div class="d-flex">
+                        <p class="flex-row mt-1 mr-1 mb-0">Пароль:</p>
+                        <input type="password" name="password" class='f flex-row mt-1 p-0' pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$">
+                    </div>
+                    <div class="d-flex">
+                        <p class="flex-row mr-1 mb-0">Специальность:</p>
+                        <select name="qualification" class="mt-1" required>
+                            <option value="">Выберите специальность</option>
+                            <option value="Веб-разработчик">Веб-разработчик</option>
+                            <option value="Программист">Программист</option>
+                        </select> <!-- Потом они должны подставляться с сервера -->
+                    </div>
+                    <div class="d-flex">
+                        <p class="flex-row mt-1 mr-1 mb-0">Фото:</p>
+                        <input type="file" name="avatar" accept="image/*" class='f flex-row mt-1 p-0' required>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="d-flex justify-content-center buttons">
+                <input type="submit" value="Зарегистрироваться">
+            </div>
+        </form>
+        <script src="js/registerFormValidation.js"></script>
+    </main>
+    <script src="js/footer.js"></script>
+</body>
+
+</html>

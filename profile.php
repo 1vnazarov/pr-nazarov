@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" type="text/css" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
+</head>
+<style>
+    body {
+        background-color: #79d491;
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+
+    th {
+        margin: auto;
+        text-align: center;
+        padding: 0 1rem;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    th, td {
+        max-width: 150px;
+        border: 2px solid black;
+    }
+
+    #table {
+        overflow: auto;
+        width: calc(100% - 2 * 1rem);
+        margin: 0 1rem;
+    }
+</style>
+<body>
+    <h1 class="d-flex justify-content-center">Личный кабинет</h1>
+    <div class="row mx-0">
+        <div class="col-sm-5">
+            <img width="250px" height="300px" src="avatar.png">
+        </div>
+        <?php
+        echo "<h2 class='col-sm-7 m-auto'>";
+        $hours = date("H");
+        if ($hours < 12) echo "Доброе утро";
+        elseif ($hours < 18) echo "Добрый день";
+        else echo "Добрый вечер";
+        echo ", " . $_POST["fullname"] . "</h2>";
+        echo "</div>";
+        echo "<p class='mx-1 my-0 fw-bold'>Специальность: " . $_POST["qualification"] . "</p>";
+        echo "<p class='mx-1'>Ваш IP-адрес: " . $_SERVER["REMOTE_ADDR"] . "</p>";
+        ?>
+        <div id="table">
+            <table class="m-auto">
+                <thead>
+                    <tr>
+                        <th>Тема</th>
+                        <th>Аннотация</th>
+                        <th>Дипломный руководитель</th>
+                        <th>Оценка</th>
+                        <th>Год защиты</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Система учета дипломов</td>
+                        <td>Много букаф бла-бла</td>
+                        <td>Ильюшенков Л.В.</td>
+                        <td>2</td>
+                        <td>2024</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center mt-1">
+            <button class="btn btn-success">Скачать</button>
+        </div>
+        <div>
+            <button class="btn btn-danger mx-1 mt-1">Выйти</button>
+        </div>
+    <script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
