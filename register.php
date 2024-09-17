@@ -21,7 +21,7 @@
                 <div class="card bg-dark">
                     <div class="card-body">
                         <h3 class="text-center text-white mb-4">Регистрация</h3>
-                        <form action="profile.php" method="POST" id="registerForm" class="needs-validation" novalidate
+                        <form action="create_user.php" method="POST" id="registerForm" class="needs-validation" novalidate
                             enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="fullname" class="text-white">ФИО</label>
@@ -29,7 +29,16 @@
                                     placeholder="Фамилия Имя Отчество"
                                     pattern="^[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?(?:\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?)?$"
                                     required>
-                                <div class="invalid-feedback">Введите корректные фамилию, имя и отчество (последнее - при наличии).</div>
+                                <div class="invalid-feedback">Введите корректные фамилию, имя и отчество (последнее -
+                                    при наличии).</div>
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <label for="email" class="text-white">Электронная почта</label>
+                                <input type="email" name="email" id="email" class="form-control"
+                                    placeholder="Электронная почта"
+                                    pattern="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" required>
+                                <div class="invalid-feedback">Введите корректный адрес электронной почты.</div>
                             </div>
 
                             <div class="form-group mt-3">
@@ -45,8 +54,15 @@
                                 <label for="qualification" class="text-white">Специальность</label>
                                 <select name="qualification" id="qualification" class="form-control" required>
                                     <option value="">Выберите специальность</option>
-                                    <option value="Веб-разработчик">Веб-разработчик</option>
-                                    <option value="Программист">Программист</option>
+                                    <?php
+                                    require_once "db_connect.php";
+                                    $DB = db_connect();
+                                    $result = db_query($DB, "SELECT qualification_name FROM qalification;");
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        echo "<option value='" . $row["qalification_name"] . "'>" . $row["qalification_name"] . "</option>";
+                                    }
+                                    db_close($DB);
+                                    ?>
                                 </select>
                                 <div class="invalid-feedback">Выберите специальность.</div>
                             </div>
@@ -58,7 +74,8 @@
                                 <div class="invalid-feedback">Загрузите фото.</div>
                             </div>
                             <div class="d-flex mt-3">
-                                <button type="submit" class="btn btn-success m-auto justify-content-center">Зарегистрироваться</button>
+                                <button type="submit"
+                                    class="btn btn-success m-auto justify-content-center">Зарегистрироваться</button>
                             </div>
                         </form>
                     </div>

@@ -39,11 +39,11 @@
 <body>
     <h1 class="d-flex justify-content-center">Личный кабинет</h1>
     <div class="row mx-0">
-        <div class="col-sm-5">
+        <div class="col-sm-5 col-md-3 col-lg-2">
             <img width="250px" height="300px" src="avatar.png">
         </div>
         <?php
-        echo "<h2 class='col-sm-7 m-auto'>";
+        echo "<h2 class='col-sm-7 col-md-9 col-lg-10 m-auto'>";
         $hours = date("H");
         if ($hours < 12) echo "Доброе утро";
         elseif ($hours < 18) echo "Добрый день";
