@@ -57,11 +57,11 @@
                                     <?php
                                     require_once "db_connect.php";
                                     $DB = db_connect();
-                                    $result = db_query($DB, "SELECT qualification_name FROM qalification;");
+                                    $result = mysqli_query($DB, "SELECT * FROM qualification;");
                                     while ($row = mysqli_fetch_assoc($result)) {
-                                        echo "<option value='" . $row["qalification_name"] . "'>" . $row["qalification_name"] . "</option>";
+                                        echo "<option value='$row[qualification_id]'>$row[qualification_name]</option>";
                                     }
-                                    db_close($DB);
+                                    mysqli_close($DB);
                                     ?>
                                 </select>
                                 <div class="invalid-feedback">Выберите специальность.</div>

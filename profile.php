@@ -48,9 +48,10 @@
         if ($hours < 12) echo "Доброе утро";
         elseif ($hours < 18) echo "Добрый день";
         else echo "Добрый вечер";
-        echo ", " . $_POST["fullname"] . "</h2>";
+        echo ", " . $_REQUEST["fullname"] . "</h2>";
         echo "</div>";
-        echo "<p class='mx-1 my-0 fw-bold'>Специальность: " . $_POST["qualification"] . "</p>";
+        echo "<p class='mx-1 my-0 fw-bold'>Специальность: " . $_REQUEST["qualification"] . "</p>";
+        echo "<p class='mx-1'>Ваша электронная почта: " . $_REQUEST["email"] . "</p>";
         echo "<p class='mx-1'>Ваш IP-адрес: " . $_SERVER["REMOTE_ADDR"] . "</p>";
         ?>
         <div id="table">
