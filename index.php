@@ -21,12 +21,12 @@
                 <div class="card bg-dark">
                     <div class="card-body">
                         <h3 class="text-center text-white mb-4">Авторизация</h3>
-                        <form action="create_user.php" method="POST" id="registerForm" class="needs-validation"
+                        <form action="" method="POST" id="authForm" class="needs-validation"
                             novalidate enctype="multipart/form-data">
                             <div class="form-group">
-                                <label for="fullname" class="text-white">ФИО или почта</label>
-                                <input type="text" name="login" id="login" class="form-control"
-                                    placeholder="ФИО или почта" required>
+                                <label for="email" class="text-white">Адрес электронной почты</label>
+                                <input type="email" name="email" id="email" class="form-control"
+                                    placeholder="Адрес электронной почты" required>
                             </div>
                             <div class="form-group mt-3">
                                 <label for="password" class="text-white">Пароль</label>
@@ -39,14 +39,33 @@
                             </div>
                     </div>
                     </fieldset>
-                    <div class="d-flex justify-content-center gap-2 mb-3">
+                    <div class="d-flex justify-content-center gap-2 mb-3 d-flex-md-column d-flex-row flex-wrap">
                         <a href="register.php"><input type="button" class="btn btn-light"
                                 value="Зарегистрироваться"></a>
-                        <input type="submit" class="btn btn-success" value="Войти">
+                        <input type="submit" class="btn btn-success" name="submit" value="Войти">
                         <input type="button" class="btn btn-light" value="Забыли пароль">
                     </div>
                     </form>
     </main>
+    <?php
+    if (isset($_POST['submit'])) {
+        require_once "db_connect.php";
+        $DB = db_connect();
+        $result = mysqli_fetch_assoc(db_query($DB, "SELECT user_id, user_password FROM user WHERE user_email = '$_POST[email]'"));
+        if ($result && $result["user_password"] == password_verify($_POST["password"], $result["user_password"])) {
+            header("Location: profile.php?id=$result[user_id]");
+        } else {
+            echo "<script>
+    const form = document.getElementById('authForm')
+    const alert = document.createElement('div')
+    alert.id = 'alert'
+    alert.innerText = 'Не удалось войти в аккаунт. Проверьте правильность введенных данных'
+    alert.classList.add('alert', 'alert-danger')
+    form.appendChild(alert)
+    </script>";
+        }
+    }
+    ?>
     <script src="js/footer.js"></script>
 </body>
 
