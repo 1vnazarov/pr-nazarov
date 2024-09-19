@@ -14,7 +14,9 @@
         <h1 class="text-center text-white">Санкт-Петербургское государственное бюджетное профессиональное
             образовательное учреждение "Политехнический колледж городского хозяйства"</h1>
     </header>
-
+    <?php
+    session_start();
+    ?>
     <main class="container my-5 min-vh-100">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -45,6 +47,12 @@
                         <input type="submit" class="btn btn-success" name="submit" value="Войти">
                         <input type="button" class="btn btn-light" value="Забыли пароль">
                     </div>
+                    <?php
+                    if (isset($_SESSION['error'])) {
+                        echo "<div class='alert alert-danger m-0'>$_SESSION[error]</div>";
+                        unset($_SESSION['error']);
+                    }
+                    ?>
                     </form>
     </main>
     <?php
@@ -52,17 +60,13 @@
         require_once "db_connect.php";
         $DB = db_connect();
         $result = mysqli_fetch_assoc(db_query($DB, "SELECT user_id, user_password FROM user WHERE user_email = '$_POST[email]'"));
-        if ($result && $result["user_password"] == password_verify($_POST["password"], $result["user_password"])) {
+
+        if ($result && password_verify($_POST["password"], $result["user_password"])) {
             header("Location: profile.php?id=$result[user_id]");
         } else {
-            echo "<script>
-    const form = document.getElementById('authForm')
-    const alert = document.createElement('div')
-    alert.id = 'alert'
-    alert.innerText = 'Не удалось войти в аккаунт. Проверьте правильность введенных данных'
-    alert.classList.add('alert', 'alert-danger')
-    form.appendChild(alert)
-    </script>";
+            $_SESSION['error'] = 'Не удалось войти в аккаунт. Проверьте правильность введенных данных';
+            header("Location: index.php");
+            exit();
         }
     }
     ?>
