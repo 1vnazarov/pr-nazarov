@@ -59,9 +59,10 @@
     if (isset($_POST['submit'])) {
         require_once "db_connect.php";
         $DB = db_connect();
-        $result = mysqli_fetch_assoc(db_query($DB, "SELECT user_id, user_password FROM user WHERE user_email = '$_POST[email]'"));
+        $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
+        $result = mysqli_fetch_assoc(db_query($DB, "SELECT user_id, user_password FROM user WHERE user_email = ?", [$email], 's'));
 
-        if ($result && password_verify($_POST["password"], $result["user_password"])) {
+        if ($result && password_verify(htmlspecialchars($_POST["password"]), $result["user_password"])) {
             header("Location: profile.php?id=$result[user_id]");
         } else {
             $_SESSION['error'] = 'Не удалось войти в аккаунт. Проверьте правильность введенных данных';

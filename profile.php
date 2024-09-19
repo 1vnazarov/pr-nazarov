@@ -46,8 +46,9 @@
         echo "<h2 class='col-sm-7 col-md-9 col-lg-10 m-auto'>";
         require_once "db_connect.php";
         $DB = db_connect();
-        $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = $_GET[id];"));
-        $user_qualification = mysqli_fetch_assoc(db_query($DB,"SELECT qualification_name FROM qualification WHERE qualification_id = $result[id_qualification];"))["qualification_name"];
+        $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?;", [$user_id], 'i'));
+        $user_qualification = mysqli_fetch_assoc(db_query($DB,"SELECT qualification_name FROM qualification WHERE qualification_id = ?;", [$result["id_qualification"]], "i"))["qualification_name"];
         $hours = date("H");
         if ($hours < 12) echo "Доброе утро";
         elseif ($hours < 18) echo "Добрый день";
