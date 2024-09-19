@@ -52,7 +52,7 @@
 
                             <div class="form-group mt-3">
                                 <label for="qualification" class="text-white">Специальность</label>
-                                <select name="qualification" id="qualification" class="form-control" required>
+                                <select name="qualification" id="qualification" class="form-select" required>
                                     <option value="">Выберите специальность</option>
                                     <?php
                                     require_once "db_connect.php";
@@ -69,7 +69,7 @@
 
                             <div class="form-group mt-3">
                                 <label for="avatar" class="text-white">Фото</label>
-                                <input type="file" name="avatar" id="avatar" class="form-control-file" accept="image/*"
+                                <input type="file" name="avatar" id="avatar" class="form-control" accept="image/*"
                                     required>
                                 <div class="invalid-feedback">Загрузите фото.</div>
                             </div>
