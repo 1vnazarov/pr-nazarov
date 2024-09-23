@@ -24,6 +24,11 @@
 <body class="bg-dark">
     <?php
     require_once "error_handler.php";
+    require_once "db_connect.php";
+    $DB = db_connect();
+    $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) or customErrorHandler(E_USER_ERROR, "Неверный идентификатор пользователя");
+    $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?;", [$user_id], 'i'));
+    mysqli_close($DB);
     ?>
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -31,15 +36,15 @@
                 <h1 class="text-center text-white mb-4">Личный кабинет</h1>
                 <div class="row">
                     <div class="col-12 col-md-6 mb-3">
-                        <img src="avatar.png" alt="Avatar" class="profile-image img-fluid mx-auto d-block">
+                        <?php
+                        $avatar = $result["user_avatar"] or "avatar.png";
+                        echo "<img src=$avatar alt='Avatar' class='profile-image img-fluid mx-auto d-block'>";
+                        ?>
                     </div>
                     <div class="col-12 col-md-6">
                         <?php
                         echo "<h2 class='text-center text-md-start text-white'>";
-                        require_once "db_connect.php";
                         $DB = db_connect();
-                        $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-                        $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?;", [$user_id], 'i'));
                         $user_qualification = mysqli_fetch_assoc(db_query($DB, "SELECT qualification_name FROM qualification WHERE qualification_id = ?;", [$result["id_qualification"]], "i"))["qualification_name"];
                         $hours = date("H");
                         if ($hours < 12) echo "Доброе утро";
@@ -83,5 +88,4 @@
     </div>
     <script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
