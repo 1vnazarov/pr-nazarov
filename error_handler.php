@@ -19,20 +19,29 @@ function customErrorHandler($errno = null, $errstr = null, $errfile = null, $err
         E_NOTICE, E_USER_NOTICE => "info",
         default => "secondary"
     };
-    echo "
-    <div class='container flex-wrap d-flex justify-content-center'>
-        <div class='alert alert-$errorLevel mt-3'>
-            <div class='row'>
-                <p><span class='fw-bold'>Error [$errno]:</span> $errstr</p>
-            </div>
-            <div class='row'>
-                <p><span class='fw-bold'>File:</span> $errfile</p>
-            </div>
-            <div class='row'>
-                <p><span class='fw-bold'>Line:</span> $errline</p>
-            </div>
+    $alert = "
+        <div class='container flex-wrap d-flex justify-content-center'>
+            <div class='alert alert-$errorLevel mt-3'>
+                <div class='row'>
+                    <p><span class='fw-bold'>Error [$errno]:</span> $errstr</p>
+                </div>
+    ";
+    if ($errfile) $alert .= "
+        <div class='row'>
+            <p><span class='fw-bold'>File:</span> $errfile</p>
         </div>
-    </div>";
+    ";
+    if ($errline) $alert .= "
+        <div class='row'>
+            <p><span class='fw-bold'>Line:</span> $errline</p>
+        </div>
+    ";
+
+    $alert .= "
+        </div>
+    </div>
+    ";
+    echo $alert;
     exit();
 }
 error_reporting(0);
