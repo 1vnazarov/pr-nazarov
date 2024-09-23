@@ -22,6 +22,9 @@
 </head>
 
 <body class="bg-dark">
+    <?php
+    require_once "error_handler.php";
+    ?>
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">

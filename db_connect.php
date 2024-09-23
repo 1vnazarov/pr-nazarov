@@ -1,17 +1,19 @@
 <?php
+require_once "error_handler.php";
 function db_connect() {
-    $DB = mysqli_connect("localhost", "Nazarov_diplomas_archive", "12363znasS_", "Nazarov_diplomas_archive");
-    if (mysqli_connect_errno()) {
-        die("Connection failed: " . mysqli_connect_error());
+    $DB = null;
+    try {
+        $DB = mysqli_connect("localhost", "Nazarov_diplomas_archive", "12363znasS_", "Nazarov_diplomas_archive");
+    } catch (Exception $e) {
+        trigger_error("Connection failed: " . $e->getMessage(), E_USER_ERROR);
     }
-
     return $DB;
 }
 
 function db_query($DB, $query, $params = [], $types = "") {
     $stmt = mysqli_prepare($DB, $query);
     if ($stmt === false) {
-        die("Failed to prepare statement: " . mysqli_error($DB));
+        trigger_error("Failed to prepare statement: " . mysqli_error($DB), E_USER_ERROR);
     }
 
     if (!empty($params) && !empty($types)) {
@@ -19,7 +21,7 @@ function db_query($DB, $query, $params = [], $types = "") {
     }
 
     if (!mysqli_stmt_execute($stmt)) {
-        die("Execute failed: " . mysqli_stmt_error($stmt));
+        trigger_error("Execute failed: " . mysqli_stmt_error($stmt), E_USER_ERROR);
     }
 
     // Получение результата для SELECT-запроса

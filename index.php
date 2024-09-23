@@ -15,6 +15,7 @@
             образовательное учреждение "Политехнический колледж городского хозяйства"</h1>
     </header>
     <?php
+    require_once "error_handler.php";
     session_start();
     ?>
     <main class="container my-5 min-vh-100">

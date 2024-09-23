@@ -14,7 +14,9 @@
         <h1 class="text-center text-white">Санкт-Петербургское государственное бюджетное профессиональное
             образовательное учреждение "Политехнический колледж городского хозяйства"</h1>
     </header>
-
+    <?php
+    require_once "error_handler.php";
+    ?>
     <main class="container my-5 min-vh-100">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -51,13 +53,15 @@
                             </div>
 
                             <div class="form-group mt-3">
+                                <?php
+                                require_once "db_connect.php";
+                                $DB = db_connect();
+                                $result = db_query($DB, "SELECT * FROM qualification;");
+                                ?>
                                 <label for="qualification" class="text-white">Специальность</label>
                                 <select name="qualification" id="qualification" class="form-select" required>
                                     <option value="">Выберите специальность</option>
                                     <?php
-                                    require_once "db_connect.php";
-                                    $DB = db_connect();
-                                    $result = mysqli_query($DB, "SELECT * FROM qualification;");
                                     while ($row = mysqli_fetch_assoc($result)) {
                                         echo "<option value='$row[qualification_id]'>$row[qualification_name]</option>";
                                     }

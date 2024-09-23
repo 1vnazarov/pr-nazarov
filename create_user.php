@@ -1,5 +1,6 @@
 <?php
 require_once "db_connect.php";
+require_once "error_handler.php";
 $DB = db_connect();
 $fullname = filter_input(INPUT_POST, 'fullname', FILTER_VALIDATE_REGEXP, [
     'options' => ['regexp' => "/^[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?(?:\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?)?$/u"]
