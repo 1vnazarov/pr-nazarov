@@ -37,8 +37,7 @@
                 <div class="row">
                     <div class="col-12 col-md-6 mb-3">
                         <?php
-                        $avatar = $result["user_avatar"] or "avatar.png";
-                        echo "<img src=$avatar alt='Avatar' class='profile-image img-fluid mx-auto d-block'>";
+                        echo "<img src=$result[user_avatar] alt='Avatar' class='profile-image img-fluid mx-auto d-block'>";
                         ?>
                     </div>
                     <div class="col-12 col-md-6">
