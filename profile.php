@@ -26,7 +26,7 @@
     require_once "error_handler.php";
     require_once "db_connect.php";
     $DB = db_connect();
-    $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) or customErrorHandler(E_USER_ERROR, "Неверный идентификатор пользователя");
+    $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) or Error(E_USER_ERROR, "Неверный идентификатор пользователя");
     $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?;", [$user_id], 'i'));
     mysqli_close($DB);
     ?>

@@ -1,5 +1,5 @@
 <?php
-function customErrorHandler($errno = null, $errstr = null, $errfile = null, $errline = null) {
+function Error($errno = null, $errstr = null, $errfile = null, $errline = null) {
     // Если ошибка не передана, проверяем фатальные ошибки через error_get_last()
     if ($errno === null) {
         $error = error_get_last();
@@ -45,6 +45,6 @@ function customErrorHandler($errno = null, $errstr = null, $errfile = null, $err
     exit();
 }
 error_reporting(0);
-register_shutdown_function('customErrorHandler');
-set_error_handler("customErrorHandler");
+register_shutdown_function('Error');
+set_error_handler("Error");
 ?>

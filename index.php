@@ -60,7 +60,7 @@
     if (isset($_POST['submit'])) {
         require_once "db_connect.php";
         $DB = db_connect();
-        $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL) or customErrorHandler(E_USER_ERROR, "Неверный email");
+        $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL) or Error(E_USER_ERROR, "Неверный email");
         $result = mysqli_fetch_assoc(db_query($DB, "SELECT user_id, user_password FROM user WHERE user_email = ?", [$email], 's'));
 
         if ($result && password_verify(htmlspecialchars($_POST["password"]), $result["user_password"])) {
