@@ -91,7 +91,7 @@
                 </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
                     <button class="btn btn-success">Скачать</button>
-                    <button class="btn btn-danger">Выйти</button>
+                    <a class="btn btn-danger" href="/index.php">Выйти</a>
                 </div>
             </div>
         </div>

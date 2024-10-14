@@ -40,7 +40,7 @@
                                 <input type="email" name="email" id="email" class="form-control"
                                     placeholder="Электронная почта"
                                     pattern="^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}$" required>
-                                <div class="invalid-feedback">Введите корректный адрес электронной почты.</div>
+                                <div class="invalid-feedback" id="emailInvalidFeedback">Введите корректный адрес электронной почты.</div>
                                 <div class="invalid-feedback d-none" id="notUniqueEmailMessage">Адрес электронной почты уже используется.</div>
                             </div>
 
