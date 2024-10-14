@@ -25,8 +25,9 @@
     <?php
     require_once "error_handler.php";
     require_once "db_connect.php";
+    session_start();
     $DB = db_connect();
-    $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) or Error(E_USER_ERROR, "Неверный идентификатор пользователя");
+    $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) or Error("Неверный идентификатор пользователя");
     $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?;", [$user_id], 'i'));
     mysqli_close($DB);
     ?>
@@ -37,8 +38,25 @@
                 <?php if ($result['check_email'] == 0) {?>
                 <div class="alert alert-danger text-center" role="alert">
                     Пожалуйста, подтвердите электронную почту для полного доступа к системе.
+                    <form method="post" action="send_confirmation_email.php">
+                        <input type="hidden" name="user_id" value="<?= $user_id; ?>">
+                        <button type="submit" class="btn btn-secondary mt-2">Подтвердить</button>
+                    </form>
                 </div>
-                <?php }?>
+                <?php }
+                if (isset($_SESSION['confirm_email_success'])) {?>
+                    <div class="alert alert-success text-center" role="alert">
+                        <?= $_SESSION['confirm_email_success']?>
+                    </div>
+                    <?php unset($_SESSION['confirm_email_success'])?>
+                <?php }
+                if (isset($_SESSION['confirm_email_error'])) {?>
+                    <div class="alert alert-error text-center" role="alert">
+                        <?= $_SESSION['confirm_email_error']?>
+                    </div>
+                    <?php unset($_SESSION['confirm_email_error'])?>
+                <?php }
+                ?>
                 <div class="row">
                     <div class="col-12 col-md-6 mb-3">
                         <?php
