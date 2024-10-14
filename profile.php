@@ -34,6 +34,11 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <h1 class="text-center text-white mb-4">Личный кабинет</h1>
+                <?php if ($result['check_email'] == 0) {?>
+                <div class="alert alert-danger text-center" role="alert">
+                    Пожалуйста, подтвердите электронную почту для полного доступа к системе.
+                </div>
+                <?php }?>
                 <div class="row">
                     <div class="col-12 col-md-6 mb-3">
                         <?php
@@ -45,11 +50,17 @@
                         echo "<h2 class='text-center text-md-start text-white'>";
                         $DB = db_connect();
                         $user_qualification = mysqli_fetch_assoc(db_query($DB, "SELECT qualification_name FROM qualification WHERE qualification_id = ?;", [$result["id_qualification"]], "i"))["qualification_name"];
-                        $hours = date("H");
-                        if ($hours < 12) echo "Доброе утро";
-                        elseif ($hours < 18) echo "Добрый день";
-                        else echo "Добрый вечер";
-                        echo ", " . $result["user_fullname"] . "</h2>";
+                        ?>
+                        <script>
+                            const hours = new Date().getHours()
+                            let text = ""
+                            if (hours < 12) text = "Доброе утро"
+                            else if (hours < 18) text = "Добрый день"
+                            else text = "Добрый вечер"
+                            document.write(`${text},`)
+                        </script>
+                        <?php
+                        echo $result["user_fullname"] . "</h2>";
                         echo "<p class='text-white fw-bold'>Специальность: " . $user_qualification . "</p>";
                         echo "<p class='text-white'>Электронная почта: " . $result["user_email"] . "</p>";
                         echo "<p class='text-white'>IP-адрес: " . $_SERVER["REMOTE_ADDR"] . "</p>";
