@@ -20,9 +20,10 @@ function send_confirmation_email($user)
                     color: #333;
                     margin: 0;
                     padding: 0;
+                    font-size: 18px;
                 }
                 .email-container {
-                    background-color: #ffffff;
+                    background-color: white;
                     margin: 0 auto;
                     padding: 20px;
                     max-width: 600px;
@@ -31,7 +32,7 @@ function send_confirmation_email($user)
                 }
                 .email-header {
                     background-color: #007bff;
-                    color: #ffffff;
+                    color: white;
                     padding: 10px;
                     text-align: center;
                     border-radius: 8px 8px 0 0;
@@ -44,21 +45,17 @@ function send_confirmation_email($user)
                     background-color: #f4f4f4;
                     text-align: center;
                     padding: 10px;
-                    font-size: 12px;
                     color: #777;
                     border-radius: 0 0 8px 8px;
                 }
-                a.button {
+                .button {
                     background-color: #28a745;
-                    color: #ffffff;
+                    color: white;
                     text-decoration: none;
                     padding: 10px 20px;
                     border-radius: 5px;
                     display: inline-block;
                     margin-top: 10px;
-                }
-                a.button:hover {
-                    background-color: #218838;
                 }
             </style>
         </head>
