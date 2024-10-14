@@ -39,17 +39,18 @@
                                 <label for="email" class="text-white">Электронная почта</label>
                                 <input type="email" name="email" id="email" class="form-control"
                                     placeholder="Электронная почта"
-                                    pattern="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" required>
+                                    pattern="^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}$" required>
                                 <div class="invalid-feedback">Введите корректный адрес электронной почты.</div>
+                                <div class="invalid-feedback d-none" id="notUniqueEmailMessage">Адрес электронной почты уже используется.</div>
                             </div>
 
                             <div class="form-group mt-3">
                                 <label for="password" class="text-white">Пароль</label>
                                 <input type="password" name="password" id="password" class="form-control"
                                     placeholder="Придумайте пароль"
-                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$" required>
+                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?.,&^_])[A-Za-z\d!?.,&^_]{8,}$" required>
                                 <div class="invalid-feedback">Пароль должен содержать минимум 8 символов, одну заглавную
-                                    букву, одну строчную букву и одну цифру.</div>
+                                    букву, одну строчную букву, одну цифру, один из спец.символов.</div>
                             </div>
 
                             <div class="form-group mt-3">
@@ -78,7 +79,7 @@
                                 <div class="invalid-feedback">Загрузите фото.</div>
                             </div>
                             <div class="d-flex mt-3">
-                                <button type="submit"
+                                <button type="submit" id="submit"
                                     class="btn btn-success m-auto justify-content-center">Зарегистрироваться</button>
                             </div>
                         </form>
@@ -90,6 +91,7 @@
     <script src="bootstrap-5.3.3-dist/js/bootstrap.min.js"></script>
     <script src="js/footer.js"></script>
     <script src="js/validateForms.js"></script>
+    <script src="js/uniqueEmail.js"></script>
 </body>
 
 </html>

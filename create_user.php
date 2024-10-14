@@ -6,13 +6,12 @@ $fullname = filter_input(INPUT_POST, 'fullname', FILTER_VALIDATE_REGEXP, [
     'options' => ['regexp' => "/^[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?(?:\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?)?$/u"]
 ]) or Error(E_USER_ERROR, "Неверное ФИО");
 $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL) or Error(E_USER_ERROR, "Неверный email");
-$password = $_POST['password'];
-if (!$password) {
-    Error(E_USER_ERROR, "Пароль не может быть пустым");
-}
+$password = filter_input(INPUT_POST, 'password', FILTER_VALIDATE_REGEXP, [
+    'options'=> ['regexp'=> '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?.,&^_])[A-Za-z\d!?.,&^_]{8,}$/u']
+]) or Error(E_USER_ERROR, "Пароль не может быть пустым");
 $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-$password_hash = password_hash(htmlspecialchars($_POST["password"]), PASSWORD_DEFAULT);
+$password_hash = password_hash(htmlspecialchars($password), PASSWORD_DEFAULT);
 $qualification = filter_input(INPUT_POST, 'qualification', FILTER_VALIDATE_INT) or Error(E_USER_ERROR, "Неверная специальность");
 $image_fieldname = "avatar";
 if ($_FILES[$image_fieldname]['error'] !== 0) {

@@ -23,17 +23,17 @@ function Error($errno = null, $errstr = null, $errfile = null, $errline = null) 
         <div class='container flex-wrap d-flex justify-content-center'>
             <div class='alert alert-$errorLevel mt-3'>
                 <div class='row'>
-                    <p><span class='fw-bold'>Error [$errno]:</span> $errstr</p>
+                    <p><span class='fw-bold'>Ошибка:</span> $errstr</p>
                 </div>
     ";
     if ($errfile) $alert .= "
         <div class='row'>
-            <p><span class='fw-bold'>File:</span> $errfile</p>
+            <p><span class='fw-bold'>В файле:</span> $errfile</p>
         </div>
     ";
     if ($errline) $alert .= "
         <div class='row'>
-            <p><span class='fw-bold'>Line:</span> $errline</p>
+            <p><span class='fw-bold'>На строке:</span> $errline</p>
         </div>
     ";
 
