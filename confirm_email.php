@@ -17,10 +17,10 @@ if ($email && $token) {
         // Обновляем check_email на подтвержден
         db_query($DB, "UPDATE user SET check_email = 1 WHERE user_email = ?", [$email], "s");
         $_SESSION['confirm_email_success'] = "Ваш адрес электронной почты успешно подтвержден!";
+        header("Location: /profile.php?id=$result[user_id]");
     } else {
-        $_SESSION['confirm_email_error'] = "Некорректная ссылка подтверждения или адрес уже подтвержден.";
+        Error("Некорректная ссылка подтверждения или адрес уже подтвержден.");
     }
-    header("Location: /profile.php?id=$result[user_id]");
 } else {
     Error("Неверные параметры.");
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,28 +36,33 @@
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
                 <h1 class="text-center text-white mb-4">Личный кабинет</h1>
-                <?php if ($result['check_email'] == 0) {?>
-                <div class="alert alert-danger text-center" role="alert">
-                    Пожалуйста, подтвердите электронную почту для полного доступа к системе.
-                    <form method="post" action="send_confirmation_email.php">
-                        <input type="hidden" name="user_id" value="<?= $user_id; ?>">
-                        <button type="submit" class="btn btn-secondary mt-2">Подтвердить</button>
-                    </form>
-                </div>
+                <?php if ($result['check_email'] == 0 && !isset($_SESSION['email_sent_success'])) { ?>
+                    <div class="alert alert-danger text-center" role="alert">
+                        Пожалуйста, подтвердите электронную почту для полного доступа к системе.
+                        <form method="post" action="send_confirmation_email.php">
+                            <input type="hidden" name="user_id" value="<?= $user_id; ?>">
+                            <button type="submit" class="btn btn-secondary mt-2">Подтвердить</button>
+                        </form>
+                    </div>
                 <?php }
-                if (isset($_SESSION['confirm_email_success'])) {?>
+                if (isset($_SESSION['confirm_email_success'])) { ?>
                     <div class="alert alert-success text-center" role="alert">
-                        <?= $_SESSION['confirm_email_success']?>
+                        <?= $_SESSION['confirm_email_success'] ?>
                     </div>
-                    <?php unset($_SESSION['confirm_email_success'])?>
-                <?php }
-                if (isset($_SESSION['confirm_email_error'])) {?>
+                <?php unset($_SESSION['confirm_email_success']);
+                }
+                if (isset($_SESSION['email_sent_error'])) { ?>
                     <div class="alert alert-error text-center" role="alert">
-                        <?= $_SESSION['confirm_email_error']?>
+                        <?= $_SESSION['email_sent_error'] ?>
                     </div>
-                    <?php unset($_SESSION['confirm_email_error'])?>
-                <?php }
-                ?>
+                <?php unset($_SESSION['email_sent_error']);
+                }
+                if (isset($_SESSION['email_sent_success'])) { ?>
+                    <div class="alert alert-success text-center" role="alert">
+                        <?= $_SESSION['email_sent_success'] ?>
+                    </div>
+                <?php unset($_SESSION['email_sent_success']);
+                } ?>
                 <div class="row">
                     <div class="col-12 col-md-6 mb-3">
                         <?php
@@ -116,4 +122,5 @@
     </div>
     <script src="bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

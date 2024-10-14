@@ -21,9 +21,11 @@
     <main class='fs-3 container min-vh-100 flex-wrap d-flex justify-content-center'>
         <div class='alert alert-danger w-100'>
             <div class='row d-flex justify-content-center'>
-                <p class="justify-content-center d-flex flex-grow-1 text-center"><span class='fw-bold'>Ошибка: </span><?= $message ?></p>
+                <h1 class="justify-content-center d-flex flex-grow-1 text-center">Ошибка</h1>
+                <p class="justify-content-center d-flex flex-grow-1 text-center"><?= $message ?></p>
                 <a class="justify-content-end d-flex w-auto" href="javascript:history.go(-1)">Назад</a>
             </div>
+            <a class="justify-content-center d-flex w-auto" href="index.php">На главную</a>
         </div>
     </main>
 

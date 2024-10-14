@@ -9,10 +9,76 @@ function send_confirmation_email($user)
     $token = white_date($user['user_date_created']);
     $email = $user['user_email'];
     $url = "https://pr-nazarov.сделай.site/confirm_email.php?email=$email&token=$token";
-    $message = "<h1>Здравствуйте!</h1>
-    <p>Пожалуйста, подтвердите ваш адрес электронной почты, перейдя по следующей</p>
-    <a href='$url'>ссылке</a>
-    <p>Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо.</p>";
+    $message = "
+    <html>
+        <head>
+            <meta charset='UTF-8'>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    color: #333;
+                    margin: 0;
+                    padding: 0;
+                }
+                .email-container {
+                    background-color: #ffffff;
+                    margin: 0 auto;
+                    padding: 20px;
+                    max-width: 600px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                .email-header {
+                    background-color: #007bff;
+                    color: #ffffff;
+                    padding: 10px;
+                    text-align: center;
+                    border-radius: 8px 8px 0 0;
+                }
+                .email-body {
+                    padding: 20px;
+                    text-align: center;
+                }
+                .email-footer {
+                    background-color: #f4f4f4;
+                    text-align: center;
+                    padding: 10px;
+                    font-size: 12px;
+                    color: #777;
+                    border-radius: 0 0 8px 8px;
+                }
+                a.button {
+                    background-color: #28a745;
+                    color: #ffffff;
+                    text-decoration: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    display: inline-block;
+                    margin-top: 10px;
+                }
+                a.button:hover {
+                    background-color: #218838;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='email-header'>
+                    <h1>Подтверждение электронной почты</h1>
+                </div>
+                <div class='email-body'>
+                    <p>Здравствуйте!</p>
+                    <p>Пожалуйста, подтвердите ваш адрес электронной почты, нажав на кнопку ниже:</p>
+                    <a href='$url' class='button'>Подтвердить Email</a>
+                    <p>Если вы не регистрировались на нашем сайте, просто проигнорируйте это письмо.</p>
+                </div>
+                <div class='email-footer'>
+                    <p>&copy; Политехнический колледж городского хозяйства, 2024. Все права защищены.</p>
+                </div>
+            </div>
+        </body>
+    </html>";
 
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
@@ -25,41 +91,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = filter_input(INPUT_POST, 'user_id', FILTER_VALIDATE_INT) or Error("Неверный идентификатор пользователя");
 
     $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?", [$user_id], "i"));
-    ?>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="style.css">
-        <title>Практическая работа</title>
-    </head>
-
-    <body class="bg-light">
-        <header class="bg-dark py-3">
-            <h1 class="text-center text-white">Санкт-Петербургское государственное бюджетное профессиональное
-                образовательное учреждение "Политехнический колледж городского хозяйства"</h1>
-        </header>
-        <main class="container my-5 min-vh-100">
-            <?php
-            if ($result) {
-                if (send_confirmation_email($result)) { ?>
-                    <div class="alert alert-success text-center" role="alert">
-                        Письмо для подтверждения было отправлено на ваш email
-                    </div> <?php
-                        } else { ?>
-                    <div class="alert alert-danger text-center" role="alert">
-                        Произошла ошибка при отправке письма.
-                    </div> <?php
-                        }
-                    } else { ?>
-                <div class="alert alert-danger text-center" role="alert">
-                    Пользователь не найден.
-                </div> <?php
-                    }?>
-        </main>
-        <script src="js/footer.js"></script>
-
-    </body>
-<?php
+    session_start();
+    if ($result) {
+        if (send_confirmation_email($result)) {
+            $_SESSION['email_sent_success'] = "Письмо для подтверждения было отправлено на ваш email";
+        } else {
+            $_SESSION['email_sent_error'] = "Произошла ошибка при отправке письма.";
+        }
+    } else {
+        $_SESSION['email_sent_error'] = "Пользователь не найден.";
+    }
     mysqli_close($DB);
+    header("Location: /profile.php?id=$user_id");
 }
