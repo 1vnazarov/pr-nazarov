@@ -14,7 +14,9 @@
         <h1 class="text-center text-white">Санкт-Петербургское государственное бюджетное профессиональное
             образовательное учреждение "Политехнический колледж городского хозяйства"</h1>
     </header>
-
+    <?php
+    require_once "error_handler.php";
+    ?>
     <main class="container my-5 min-vh-100">
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -37,27 +39,30 @@
                                 <label for="email" class="text-white">Электронная почта</label>
                                 <input type="email" name="email" id="email" class="form-control"
                                     placeholder="Электронная почта"
-                                    pattern="^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$" required>
-                                <div class="invalid-feedback">Введите корректный адрес электронной почты.</div>
+                                    pattern="^[a-zA-Z0-9._\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,4}$" required>
+                                <div class="invalid-feedback" id="emailInvalidFeedback">Введите корректный адрес электронной почты.</div>
+                                <div class="invalid-feedback d-none" id="notUniqueEmailMessage">Адрес электронной почты уже используется.</div>
                             </div>
 
                             <div class="form-group mt-3">
                                 <label for="password" class="text-white">Пароль</label>
                                 <input type="password" name="password" id="password" class="form-control"
                                     placeholder="Придумайте пароль"
-                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$" required>
+                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?.,&^_])[A-Za-z\d!?.,&^_]{8,}$" required>
                                 <div class="invalid-feedback">Пароль должен содержать минимум 8 символов, одну заглавную
-                                    букву, одну строчную букву и одну цифру.</div>
+                                    букву, одну строчную букву, одну цифру, один из спец.символов.</div>
                             </div>
 
                             <div class="form-group mt-3">
+                                <?php
+                                require_once "db_connect.php";
+                                $DB = db_connect();
+                                $result = db_query($DB, "SELECT * FROM qualification;");
+                                ?>
                                 <label for="qualification" class="text-white">Специальность</label>
-                                <select name="qualification" id="qualification" class="form-control" required>
+                                <select name="qualification" id="qualification" class="form-select" required>
                                     <option value="">Выберите специальность</option>
                                     <?php
-                                    require_once "db_connect.php";
-                                    $DB = db_connect();
-                                    $result = mysqli_query($DB, "SELECT * FROM qualification;");
                                     while ($row = mysqli_fetch_assoc($result)) {
                                         echo "<option value='$row[qualification_id]'>$row[qualification_name]</option>";
                                     }
@@ -69,12 +74,12 @@
 
                             <div class="form-group mt-3">
                                 <label for="avatar" class="text-white">Фото</label>
-                                <input type="file" name="avatar" id="avatar" class="form-control-file" accept="image/*"
+                                <input type="file" name="avatar" id="avatar" class="form-control" accept="image/*"
                                     required>
                                 <div class="invalid-feedback">Загрузите фото.</div>
                             </div>
                             <div class="d-flex mt-3">
-                                <button type="submit"
+                                <button type="submit" id="submit"
                                     class="btn btn-success m-auto justify-content-center">Зарегистрироваться</button>
                             </div>
                         </form>
@@ -86,6 +91,7 @@
     <script src="bootstrap-5.3.3-dist/js/bootstrap.min.js"></script>
     <script src="js/footer.js"></script>
     <script src="js/validateForms.js"></script>
+    <script src="js/uniqueEmail.js"></script>
 </body>
 
 </html>
