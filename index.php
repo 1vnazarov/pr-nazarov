@@ -37,7 +37,7 @@
                                     placeholder="Пароль" required>
                             </div>
                             <div class="form-check mt-3">
-                                <input type="checkbox" class="form-check-input" id="check">
+                                <input type="checkbox" class="form-check-input" id="check" name="remember">
                                 <label class="form-check-label text-white" for="check">Оставаться на сайте</label>
                             </div>
                     </div>
@@ -59,15 +59,17 @@
     <?php
     if (isset($_POST['submit'])) {
         require_once "db_connect.php";
+        require_once "cookie.php";
         $DB = db_connect();
         $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL) or Error("Неверный email");
         $result = mysqli_fetch_assoc(db_query($DB, "SELECT user_id, user_password FROM user WHERE user_email = ?", [$email], 's'));
-
         if ($result && password_verify(htmlspecialchars($_POST["password"]), $result["user_password"])) {
-            header("Location: profile.php?id=$result[user_id]");
+            $token = updateToken($DB, $result['user_id']);
+            setCookies($result['user_id'], $token, isset($_POST['remember']));
+            header("Location: /profile.php");
         } else {
             $_SESSION['error'] = 'Не удалось войти в аккаунт. Проверьте правильность введенных данных';
-            header("Location: index.php");
+            header("Location: /index.php");
         }
     }
     ?>

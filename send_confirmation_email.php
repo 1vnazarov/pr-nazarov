@@ -86,7 +86,7 @@ function send_confirmation_email($user)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $DB = db_connect();
-    $user_id = filter_input(INPUT_POST, 'user_id', FILTER_VALIDATE_INT) or Error("Неверный идентификатор пользователя");
+    $user_id = filter_input(INPUT_COOKIE, 'id', FILTER_VALIDATE_INT) or Error("Неверный идентификатор пользователя");
 
     $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?", [$user_id], "i"));
     session_start();

@@ -1,6 +1,7 @@
 <?php
 require_once "db_connect.php";
 require_once "error_handler.php";
+require_once "cookie.php";
 $DB = db_connect();
 $fullname = filter_input(INPUT_POST, 'fullname', FILTER_VALIDATE_REGEXP, [
     'options' => ['regexp' => "/^[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?(?:\s[А-ЯЁ][а-яё]+(?:-[А-ЯЁ][а-яё]+)?)?$/u"]
@@ -34,7 +35,9 @@ if (db_query($DB, "INSERT INTO user (user_fullname, user_email, user_password, i
         Error("Ошибка перемещения файла изображения");
     }
     db_query($DB, "UPDATE user SET user_avatar = ? WHERE user_id = ?", [$avatar_filename, $user_id], "si");
-    header("Location: profile.php?id=$user_id");
+    $token = updateToken($DB, $user_id);
+    setCookies($user_id, $token, isset($_POST['remember']));
     mysqli_close($DB);
+    header("Location: profile.php");
 }
 ?>
