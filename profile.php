@@ -26,9 +26,11 @@
     <?php
     require_once "error_handler.php";
     require_once "db_connect.php";
+    require_once "cookie.php";
     session_start();
     $DB = db_connect();
-    $user_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) or Error("Неверный идентификатор пользователя");
+    checkToken($DB);
+    $user_id = filter_input(INPUT_COOKIE, 'id', FILTER_VALIDATE_INT) or Error("Неверный идентификатор пользователя");
     $result = mysqli_fetch_assoc(db_query($DB, "SELECT * FROM user WHERE user_id = ?;", [$user_id], 'i'));
     mysqli_close($DB);
     ?>
@@ -115,7 +117,7 @@
                 </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
                     <button class="btn btn-success">Скачать</button>
-                    <a class="btn btn-danger" href="/index.php">Выйти</a>
+                    <a class="btn btn-danger" href="/logout.php">Выйти</a>
                 </div>
             </div>
         </div>
