@@ -1,4 +1,5 @@
 <?php
+require_once "db_connect.php";
 function setCookies($id, $token, $remember) {
     if ($remember) {
         setcookie('id', $id, time() + 3600 * 24 * 60);
@@ -16,10 +17,7 @@ function generateToken() {
 
 function updateToken($DB, $userId) {
     $token = generateToken();
-    $stmt = mysqli_prepare($DB, "UPDATE user SET user_token = ? WHERE user_id = ?");
-    mysqli_stmt_bind_param($stmt, "si", $token, $userId);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
+    db_query($DB, "UPDATE user SET user_token = ? WHERE user_id = ?", [$token, $userId], "si");
     return $token;
 }
 
