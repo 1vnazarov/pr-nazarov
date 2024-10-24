@@ -16,7 +16,13 @@
     </header>
     <?php
     require_once "error_handler.php";
+    require_once "session.php";
     session_start();
+    if (filter_input(INPUT_COOKIE, "id") && filter_input(INPUT_COOKIE, "token")) {
+        header("Location: /profile.php");
+        exit();
+    }
+    $remaining = checkForBlock();
     ?>
     <main class="container my-5 min-vh-100">
         <div class="row justify-content-center">
@@ -24,6 +30,7 @@
                 <div class="card bg-dark">
                     <div class="card-body">
                         <h3 class="text-center text-white mb-4">Авторизация</h3>
+                        <?php if ($remaining) errorMessage("Вы заблокированы. Осталось времени: " . ceil($remaining / 60) . " минут(ы)."); ?>
                         <form action="" method="POST" id="authForm" class="needs-validation"
                             novalidate enctype="multipart/form-data">
                             <div class="form-group">
@@ -37,7 +44,7 @@
                                     placeholder="Пароль" required>
                             </div>
                             <div class="form-check mt-3">
-                                <input type="checkbox" class="form-check-input" id="check">
+                                <input type="checkbox" class="form-check-input" id="check" name="remember">
                                 <label class="form-check-label text-white" for="check">Оставаться на сайте</label>
                             </div>
                     </div>
@@ -45,12 +52,12 @@
                     <div class="d-flex justify-content-center gap-2 mb-3 d-flex-md-column d-flex-row flex-wrap">
                         <a href="register.php"><input type="button" class="btn btn-light"
                                 value="Зарегистрироваться"></a>
-                        <input type="submit" class="btn btn-success" name="submit" value="Войти">
+                                <input type="submit" class="btn btn-success" name="submit" value="Войти" <?= $remaining ? 'disabled' : '' ?>>
                         <input type="button" class="btn btn-light" value="Забыли пароль">
                     </div>
                     <?php
                     if (isset($_SESSION['error'])) {
-                        echo "<div class='alert alert-danger m-0'>$_SESSION[error]</div>";
+                        errorMessage($_SESSION['error']);
                         unset($_SESSION['error']);
                     }
                     ?>
@@ -59,15 +66,46 @@
     <?php
     if (isset($_POST['submit'])) {
         require_once "db_connect.php";
+        require_once "cookie.php";
         $DB = db_connect();
         $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL) or Error("Неверный email");
         $result = mysqli_fetch_assoc(db_query($DB, "SELECT user_id, user_password FROM user WHERE user_email = ?", [$email], 's'));
-
         if ($result && password_verify(htmlspecialchars($_POST["password"]), $result["user_password"])) {
-            header("Location: profile.php?id=$result[user_id]");
+            // Сбросить счетчик неудачных попыток при успешном входе
+            unset($_SESSION['login_attempts']);
+            unset($_SESSION['block_time']);
+
+            $token = updateToken($DB, $result['user_id']);
+            setCookies($result['user_id'], $token, isset($_POST['remember']));
+            header("Location: /profile.php");
+            exit();
         } else {
-            $_SESSION['error'] = 'Не удалось войти в аккаунт. Проверьте правильность введенных данных';
-            header("Location: index.php");
+            // Инициализация счетчика попыток, если не установлен
+            if (!isset($_SESSION['login_attempts'])) {
+                $_SESSION['login_attempts'] = [];
+            }
+
+            // Добавить время текущей попытки
+            $_SESSION['login_attempts'][] = time();
+
+            // Фильтрация попыток, оставляем только последние 5 минут
+            $_SESSION['login_attempts'] = array_filter(
+                $_SESSION['login_attempts'],
+                function($timestamp) {
+                    return time() - $timestamp < 300;
+                }
+            );
+
+            // Если попыток за последние 5 минут >= 3, устанавливаем время блокировки
+            if (count($_SESSION['login_attempts']) >= 3) {
+                $_SESSION['block_time'] = time();
+                $_SESSION['error'] = 'Слишком много неудачных попыток. Вы заблокированы на 10 минут.';
+            } else {
+                $_SESSION['error'] = 'Не удалось войти в аккаунт. Проверьте правильность введенных данных.';
+            }
+
+            header("Location: /index.php");
+            exit();
         }
     }
     ?>
