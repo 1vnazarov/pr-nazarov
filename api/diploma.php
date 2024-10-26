@@ -1,8 +1,8 @@
 <?php
 
-require_once "db_connect.php";
+require_once "BaseModel.php";
 
-class Diploma {
+class Diploma extends BaseModel {
     public $diploma_id;
     public $diploma_topic;
     public $diploma_abstract;
@@ -21,60 +21,50 @@ class Diploma {
         @$this->id_thesis_advisor = $request['id_thesis_advisor'];
         @$this->diploma_mark = $request['diploma_mark'];
         @$this->diploma_production_year = $request['diploma_production_year'];
+        
+        $this->validations = [
+            'diploma_topic' => [
+                'rule' => fn($value) => !empty($value),
+                'message' => "Тема диплома обязательна"
+            ],
+            'diploma_abstract' => [
+                'rule' => fn($value) => !empty($value),
+                'message' => "Аннотация диплома обязательна"
+            ],
+            'id_student' => [
+                'rule' => fn($value) => !empty($value) && filter_var($value, FILTER_VALIDATE_INT),
+                'message' => "ID студента обязательно и должно быть целым числом"
+            ],
+            'id_thesis_advisor' => [
+                'rule' => fn($value) => !empty($value) && filter_var($value, FILTER_VALIDATE_INT),
+                'message' => "ID дипломного руководителя обязательно и должно быть целым числом"
+            ],
+            'diploma_mark' => [
+                'rule' => fn($value) => in_array($value, ['3', '4', '5']),
+                'message' => "Оценка диплома должна быть 3, 4 или 5"
+            ],
+            'diploma_production_year' => [
+                'rule' => fn($value) => !empty($value) && preg_match('/^\d{4}$/', $value),
+                'message' => "Год защиты диплома обязателен и должен быть в формате YYYY"
+            ]
+        ];
     }
 
-    public function validation($isPost = true) {
-        $errors = [];
-        if ($isPost || isset($this->diploma_topic)) {
-            if (empty($this->diploma_topic)) {
-                $errors['diploma_topic'] = "Тема диплома обязательна";
-            }
-        }
-        if ($isPost || isset($this->diploma_abstract)) {
-            if (empty($this->diploma_abstract)) {
-                $errors['diploma_abstract'] = "Аннотация диплома обязательна";
-            }
-        }
-        if ($isPost || isset($this->id_student)) {
-            if (empty($this->id_student) || !filter_var($this->id_student, FILTER_VALIDATE_INT)) {
-                $errors['id_student'] = "ID студента обязательно и должно быть целым числом";
-            }
-        }
-        if ($isPost || isset($this->id_thesis_advisor)) {
-            if (empty($this->id_thesis_advisor) || !filter_var($this->id_thesis_advisor, FILTER_VALIDATE_INT)) {
-                $errors['id_thesis_advisor'] = "ID дипломного руководителя обязательно и должно быть целым числом";
-            }
-        }
-        if ($isPost || isset($this->diploma_mark)) {
-            if (!in_array($this->diploma_mark, ['3', '4', '5'])) {
-                $errors['diploma_mark'] = "Оценка диплома должна быть 3, 4 или 5";
-            }
-        }
-        if ($isPost || isset($this->diploma_production_year)) {
-            if (empty($this->diploma_production_year) || !preg_match('/^\d{4}$/', $this->diploma_production_year)) {
-                $errors['diploma_production_year'] = "Год защиты диплома обязателен и должен быть в формате YYYY";
-            }
-        }
-        return $errors;
-    }
-
-    public function create($DB) {
-        return query($DB, "INSERT INTO diploma (diploma_topic, diploma_abstract, diploma_text_url, id_student, id_thesis_advisor, diploma_mark, diploma_production_year) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+    public function create() {
+        return self::query("INSERT INTO diploma (diploma_topic, diploma_abstract, diploma_text_url, id_student, id_thesis_advisor, diploma_mark, diploma_production_year) VALUES (?, ?, ?, ?, ?, ?, ?)", 
             [$this->diploma_topic, $this->diploma_abstract, $this->diploma_text_url, $this->id_student, $this->id_thesis_advisor, $this->diploma_mark, $this->diploma_production_year], 
             "sssisii");
     }
 
-    public static function get_all($DB) {
-        $result = query($DB, "SELECT * FROM diploma");
-        return mysqli_fetch_all($result, MYSQLI_ASSOC);
+    public static function get_all() {
+        return self::query("SELECT * FROM diploma");
     }
 
-    public static function get_by_id($DB, $id) {
-        $result = query($DB, "SELECT * FROM diploma WHERE diploma_id = ?", [$id], "i");
-        return mysqli_fetch_assoc($result);
+    public static function get_by_id($id) {
+        return self::query("SELECT * FROM diploma WHERE diploma_id = ?", [$id], "i");
     }
 
-    public function update($DB, $id) {
+    public function update($id) {
         $updates = [];
         $params = [];
         $types = '';
@@ -121,10 +111,10 @@ class Diploma {
         $types .= 'i';
 
         $sql = "UPDATE diploma SET " . implode(', ', $updates) . " WHERE diploma_id = ?";
-        return query($DB, $sql, $params, $types);
+        return self::query($sql, $params, $types);
     }    
 
-    public static function delete($DB, $id) {
-        return query($DB, "DELETE FROM diploma WHERE diploma_id = ?", [$id], "i");
+    public static function delete($id) {
+        return self::query("DELETE FROM diploma WHERE diploma_id = ?", [$id], "i");
     }
 }

@@ -1,41 +1,38 @@
 <?php
 
-require_once "db_connect.php";
+require_once "BaseModel.php";
 
-class Qualification {
+class Qualification extends BaseModel {
     public $name;
 
     public function __construct($request) {
         @$this->name = $request['name'];
+
+        $this->validations = [
+            'name' => [
+                'rule' => fn($value) => !empty($value),
+                'message' => "Название специальности обязательно"
+            ]
+        ];
     }
 
-    public function validation() {
-        $errors = [];
-        if (empty($this->name)) {
-            $errors['name'] = "Название специальности обязательно";
-        }
-        return $errors;
+    public function create() {
+        return self::query("INSERT INTO qualification (qualification_name) VALUES ?", [$this->name], "s");
     }
 
-    public function create($DB) {
-        return query($DB, "INSERT INTO qualification (qualification_name) VALUES ?", [$this->name], "s");
+    public static function get_all() {
+        return self::query("SELECT * FROM qualification");
     }
 
-    public static function get_all($DB) {
-        $result = query($DB, "SELECT * FROM qualification");
-        return mysqli_fetch_all($result, MYSQLI_ASSOC);
+    public static function get_by_id($id) {
+        return self::query("SELECT * FROM qualification WHERE qualification_id = ?", [$id], "i");
     }
 
-    public static function get_by_id($DB, $id) {
-        $result = query($DB, "SELECT * FROM qualification WHERE qualification_id = ?", [$id], "i");
-        return mysqli_fetch_assoc($result);
+    public function update($id) {
+        return self::query("UPDATE qualification SET qualification_name = ? WHERE qualification_id = ?", [$this->name, $id], "si");
     }
 
-    public function update($DB, $id) {
-        return query($DB, "UPDATE qualification SET qualification_name = ? WHERE qualification_id = ?", [$this->name, $id], "si");
-    }
-
-    public static function delete($DB, $id) {
-        return query($DB, "DELETE FROM qualification WHERE qualification_id = ?", [$id], "i");
+    public static function delete($id) {
+        return self::query("DELETE FROM qualification WHERE qualification_id = ?", [$id], "i");
     }
 }

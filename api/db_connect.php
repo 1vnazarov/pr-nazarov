@@ -22,10 +22,14 @@ function query($DB, $query, $params = [], $types = "") {
 
     // Если результат есть (для SELECT), возвращаем его
     if ($result !== false) {
-        return $result;
+        return mysqli_num_rows($result) > 1 ? mysqli_fetch_all($result, MYSQLI_ASSOC) : mysqli_fetch_assoc($result);
+    }
+
+    // Если INSERT, вернуть id вставленной записи
+    if (stripos($query, 'INSERT') === 0) {
+        return mysqli_insert_id($DB);
     }
 
     // Иначе возвращаем успешность выполнения для других запросов
     return $stmt;
 }
-?>

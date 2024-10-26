@@ -1,8 +1,8 @@
 <?php
 
-require_once "db_connect.php";
+require_once "BaseModel.php";
 
-class User
+class User extends BaseModel
 {
     public $fullname;
     public $email;
@@ -10,6 +10,7 @@ class User
     public $id_qualification;
     public $id_role;
     public $token;
+    public $avatar;
 
     public function __construct($request)
     {
@@ -19,6 +20,30 @@ class User
         @$this->id_qualification = $request['id_qualification'];
         @$this->id_role = $request['id_role'] ?? 1;
         @$this->token = boolval($request['token']);
+        @$this->avatar = $request['avatar'];
+
+        $this->validations = [
+            'fullname' => [
+                'rule' => fn($value) => !empty($value) && preg_match("/^[A-Za-zА-Яа-яЁё\s\-]+$/u", $value),
+                'message' => "Некорректные ФИО"
+            ],
+            'email' => [
+                'rule' => fn($value) => !empty($value) && filter_var($value, FILTER_VALIDATE_EMAIL) && self::query("SELECT COUNT(*) AS count FROM user WHERE user_email = ?", [$value], "s")['count'] == 0,
+                'message' => "Некорректный email или уже занят"
+            ],
+            'password' => [
+                'rule' => fn($value) => !empty($value) && preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?.,&^_])[A-Za-z\d!?.,&^_]{8,}$/u", $value),
+                'message' => "Пароль должен содержать минимум 8 символов, одну заглавную букву, одну строчную букву, одну цифру и один из спец.символов"
+            ],
+            'id_qualification' => [
+                'rule' => fn($value) => $this->id_role != self::query("SELECT role_id FROM role WHERE role_name = ?", ["Студент"], "s")['role_id'] || !empty($value),
+                'message' => "Специальность обязательна для студента"
+            ],
+            'avatar' => [
+                'rule' => fn($value) => !empty($value) && preg_match("/^storage\/avatar_\d+_.+$/", $value),
+                'message' => "Некорректный путь к аватару"
+            ]
+        ];
     }
 
     private function generate_token()
@@ -26,57 +51,45 @@ class User
         $this->token = bin2hex(random_bytes(32));
     }
 
-    public function validation($isPost = true)
+    private function upload_avatar($user_id)
     {
-        $errors = [];
-
-        if ($isPost || isset($this->fullname)) {
-            if (empty($this->fullname) || !preg_match("/^[A-Za-zА-Яа-яЁё\s\-]+$/u", $this->fullname)) {
-                $errors['fullname'] = "Некорректные ФИО";
+        if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $avatar_filename = 'storage/avatar_' . $user_id . '_' . basename($_FILES['avatar']['name']);
+            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $avatar_filename)) {
+                return $avatar_filename;
             }
         }
-
-        if ($isPost || isset($this->email)) {
-            if (empty($this->email) || !filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
-                $errors['email'] = "Некорректный email";
-            }
-        }
-
-        if ($isPost || isset($this->password)) {
-            if (empty($this->password) || !preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?.,&^_])[A-Za-z\d!?.,&^_]{8,}$/u", $this->password)) {
-                $errors['password'] = "Пароль должен содержать минимум 8 символов, одну заглавную букву, одну строчную букву, одну цифру и один из спец.символов";
-            }
-        }
-
-        if ($isPost || isset($this->id_qualification)) {
-            if ($this->id_role == 1 && empty($this->id_qualification)) {
-                $errors['id_qualification'] = "Специальность обязательна для студента";
-            }
-        }
-
-        return $errors;
+        return null;
     }
 
-    public function create($DB)
+    public function create()
     {
         $hashed_password = password_hash($this->password, PASSWORD_DEFAULT);
         $this->generate_token();
-        return query($DB, "INSERT INTO user (user_fullname, user_email, user_password, id_qualification, id_role, user_token) VALUES (?, ?, ?, ?, ?, ?)", [$this->fullname, $this->email, $hashed_password, $this->id_qualification, $this->id_role, $this->token], "sssiis");
+        $user_id = self::query(
+            "INSERT INTO user (user_fullname, user_email, user_password, id_qualification, id_role, user_token) VALUES (?, ?, ?, ?, ?, ?)",
+            [$this->fullname, $this->email, $hashed_password, $this->id_qualification, $this->id_role, $this->token],
+            "sssiis"
+        );
+        if ($user_id) {
+            $avatarPath = $this->upload_avatar($user_id);
+            if ($avatarPath) self::query("UPDATE user SET avatar = ? WHERE user_id = ?", [$avatarPath, $user_id], "si");
+            return $user_id;
+        }
+        return false;
     }
 
-    public static function get_all($DB)
+    public static function get_all()
     {
-        $result = query($DB, "SELECT * FROM user");
-        return mysqli_fetch_all($result, MYSQLI_ASSOC);
+        return self::query("SELECT * FROM user");
     }
 
-    public static function get_by_id($DB, $id)
+    public static function get_by_id($id)
     {
-        $result = query($DB, "SELECT * FROM user WHERE user_id = ?", [$id], "i");
-        return mysqli_fetch_assoc($result);
+        return self::query("SELECT * FROM user WHERE user_id = ?", [$id], "i");
     }
 
-    public function update($DB, $id)
+    public function update($id)
     {
         $updates = [];
         $params = [];
@@ -116,17 +129,23 @@ class User
             $types .= 's';
         }
 
+        if ($this->avatar) {
+            $updates[] = "avatar = ?";
+            $params[] = $this->avatar;
+            $types .= 's';
+        }
+
         if (empty($updates)) return false;
 
         $params[] = $id;
         $types .= 'i';
 
         $sql = "UPDATE user SET " . implode(', ', $updates) . " WHERE user_id = ?";
-        return query($DB, $sql, $params, $types);
+        return self::query($sql, $params, $types);
     }
 
-    public static function delete($DB, $id)
+    public static function delete($id)
     {
-        return query($DB, "DELETE FROM user WHERE user_id = ?", [$id], "i");
+        return self::query("DELETE FROM user WHERE user_id = ?", [$id], "i");
     }
 }

@@ -2,13 +2,11 @@
 
 ob_start();
 
-require_once 'db_connect.php';
 require_once 'diploma.php';
 require_once 'qualification.php';
 require_once 'role.php';
 require_once 'user.php';
 
-$DB = connect();
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
 // Заголовки CORS
@@ -34,7 +32,7 @@ function sendResponse($statusCode, $message = '', $data = [])
 // Общая функция для обработки запросов
 function handleRequest($class, $action, $id = null)
 {
-    global $DB, $requestMethod;
+    global $requestMethod;
     if (!class_exists($class)) {
         sendResponse(404, 'Ресурс не найден');
     }
@@ -49,8 +47,9 @@ function handleRequest($class, $action, $id = null)
             if ($errors) {
                 sendResponse(422, 'Ошибка валидации', ['errors' => $errors]);
             }
-            if ($instance->create($DB)) {
-                sendResponse(201, 'Успешно создано');
+            $new_item_id = $instance->create();
+            if ($new_item_id) {
+                sendResponse(201, null, ['id' => $new_item_id]);
             } else {
                 sendResponse(507, 'Не удалось сохранить данные');
             }
@@ -60,7 +59,7 @@ function handleRequest($class, $action, $id = null)
             if ($requestMethod != 'GET') {
                 sendResponse(405, 'Используйте метод GET');
             }
-            $items = $class::get_all($DB);
+            $items = $class::get_all();
             sendResponse(200, null, $items);
             break;
 
@@ -68,7 +67,7 @@ function handleRequest($class, $action, $id = null)
             if ($requestMethod != 'GET') {
                 sendResponse(405, 'Используйте метод GET');
             }
-            $item = $class::get_by_id($DB, $id);
+            $item = $class::get_by_id($id);
             if ($item) {
                 sendResponse(200, null, $item);
             } else {
@@ -85,7 +84,7 @@ function handleRequest($class, $action, $id = null)
             if ($errors) {
                 sendResponse(422, 'Ошибка валидации', ['errors' => $errors]);
             }
-            if ($instance->update($DB, $id)) {
+            if ($instance->update($id)) {
                 sendResponse(204);
             } else {
                 sendResponse(507, 'Не удалось обновить данные');
@@ -96,7 +95,7 @@ function handleRequest($class, $action, $id = null)
             if ($requestMethod != 'DELETE') {
                 sendResponse(405, 'Используйте метод DELETE');
             }
-            if ($class::delete($DB, $id)) {
+            if ($class::delete($id)) {
                 sendResponse(204);
             } else {
                 sendResponse(404, 'Не найдено');
@@ -117,17 +116,18 @@ $actionMethods = [
     'POST' => 'create',
     'PATCH' => 'update',
     'DELETE' => 'delete',
-    'GET' => 'get_by_id'
+    'GET' => 'get_all'
 ];
 
 if (array_key_exists($requestMethod, $actionMethods)) {
     $action = $actionMethods[$requestMethod];
-    if (in_array($action, ['update', 'delete', 'get_by_id'])) {
-        if (isset($requestUri[1]) && is_numeric($requestUri[1])) {
-            $id = $requestUri[1];
-        } else {
-            sendResponse(400, 'ID не указан для ' . ($action === 'update' ? 'обновления' : ($action === 'delete' ? 'удаления' : 'получения')));
+    if (isset($requestUri[1]) && is_numeric($requestUri[1])) {
+        $id = $requestUri[1];
+        if ($action === 'get_all') {
+            $action = 'get_by_id';
         }
+    } elseif (in_array($action, ['update', 'delete', 'get_by_id'])) {
+        sendResponse(400, 'ID не указан для ' . ($action === 'update' ? 'обновления' : ($action === 'delete' ? 'удаления' : 'получения')));
     }
 }
 
