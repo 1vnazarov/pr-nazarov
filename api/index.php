@@ -75,8 +75,8 @@ function handleRequest($class, $action, $DB, $id = null)
             break;
 
         case 'update':
-            if ($_SERVER['REQUEST_METHOD'] != 'PUT') {
-                sendResponse(405, 'Используйте метод PUT');
+            if ($_SERVER['REQUEST_METHOD'] != 'PATCH') {
+                sendResponse(405, 'Используйте метод PATCH');
             }
             $instance = new $class($data);
             $errors = $instance->validation(false);
@@ -113,7 +113,7 @@ $id = null;
 
 $actionMethods = [
     'POST' => 'create',
-    'PUT' => 'update',
+    'PATCH' => 'update',
     'DELETE' => 'delete',
     'GET' => 'get_by_id'
 ];
