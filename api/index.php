@@ -20,111 +20,90 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     return http_response_code(200);
 }
 
+// Функция для отправки ответа
+function sendResponse($statusCode, $message = '', $data = [])
+{
+    ob_clean();
+    http_response_code($statusCode);
+    if ($message) $data['message'] = $message;
+    echo json_encode($data);
+    exit;
+}
+
 // Общая функция для обработки запросов
 function handleRequest($class, $action, $DB, $id = null)
 {
-    $statusCode = 200;
-    $responseMessage = '';
-    $responseData = [];
-
+    if (!class_exists($class)) {
+        sendResponse(404, 'Ресурс не найден');
+    }
+    $data = json_decode(file_get_contents("php://input"), true);
     switch ($action) {
         case 'create':
             if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-                $statusCode = 405;
-                $responseMessage = 'Используйте метод POST';
-                break;
+                sendResponse(405, 'Используйте метод POST');
             }
-            $instance = new $class($_POST);
+            $instance = new $class(!empty($_POST) ? $_POST : $data);
             $errors = $instance->validation();
             if ($errors) {
-                $statusCode = 422;
-                $responseMessage = 'Ошибка валидации';
-                $responseData = ['errors' => $errors];
-                break;
+                sendResponse(422, 'Ошибка валидации', ['errors' => $errors]);
             }
             if ($instance->create($DB)) {
-                $statusCode = 201;
-                $responseMessage = 'Успешно создано';
+                sendResponse(201, 'Успешно создано');
             } else {
-                $statusCode = 507;
-                $responseMessage = 'Не удалось сохранить данные';
+                sendResponse(507, 'Не удалось сохранить данные');
             }
             break;
 
         case 'get_all':
             if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-                $statusCode = 405;
-                $responseMessage = 'Используйте метод GET';
-                break;
+                sendResponse(405, 'Используйте метод GET');
             }
             $items = $class::get_all($DB);
-            $responseData = $items;
+            sendResponse(200, null, $items);
             break;
 
         case 'get_by_id':
             if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-                $statusCode = 405;
-                $responseMessage = 'Используйте метод GET';
-                break;
+                sendResponse(405, 'Используйте метод GET');
             }
             if ($id === null) {
-                $statusCode = 400;
-                $responseMessage = 'ID не указан';
-                break;
+                sendResponse(400, 'ID не указан');
             }
             $item = $class::get_by_id($DB, $id);
             if ($item) {
-                $responseData = $item;
+                sendResponse(200, null, $item);
             } else {
-                $statusCode = 404;
-                $responseMessage = 'Не найдено';
+                sendResponse(404, 'Не найдено');
             }
             break;
 
         case 'update':
             if ($_SERVER['REQUEST_METHOD'] != 'PUT') {
-                $statusCode = 405;
-                $responseMessage = 'Используйте метод PUT';
-                break;
+                sendResponse(405, 'Используйте метод PUT');
             }
-            parse_str(file_get_contents("php://input"), $put_vars);
-            $instance = new $class($put_vars);
-            $errors = $instance->validation();
+            $instance = new $class($data);
+            $errors = $instance->validation(false);
             if ($errors) {
-                $statusCode = 422;
-                $responseMessage = 'Ошибка валидации';
-                $responseData = ['errors' => $errors];
-                break;
+                sendResponse(422, 'Ошибка валидации', ['errors' => $errors]);
             }
-            if ($instance->update($DB, $put_vars['id'])) {
-                $statusCode = 200;
-                $responseMessage = 'Успешно обновлено';
+            if ($instance->update($DB, $id)) {
+                sendResponse(204);
             } else {
-                $statusCode = 507;
-                $responseMessage = 'Не удалось обновить данные';
+                sendResponse(507, 'Не удалось обновить данные');
             }
             break;
 
         case 'delete':
             if ($_SERVER['REQUEST_METHOD'] != 'DELETE') {
-                $statusCode = 405;
-                $responseMessage = 'Используйте метод DELETE';
-                break;
+                sendResponse(405, 'Используйте метод DELETE');
             }
-            parse_str(file_get_contents("php://input"), $delete_vars);
-            if ($class::delete($DB, $delete_vars['id'])) {
-                $statusCode = 200;
-                $responseMessage = 'Успешно удалено';
+            if ($class::delete($DB, $id)) {
+                sendResponse(204);
             } else {
-                $statusCode = 404;
-                $responseMessage = 'Не найдено';
+                sendResponse(404, 'Не найдено');
             }
             break;
     }
-
-    ob_clean();
-    http_response_code($statusCode);
-    return json_encode(array_merge(['code' => $statusCode, 'message' => $responseMessage], $responseData));
 }
 
 // Обработка маршрутов
@@ -132,33 +111,30 @@ $queryString = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
 parse_str($queryString, $queryParams);
 $requestUri = explode('/', trim($queryParams['q'], '/'));
 $className = ucfirst($requestUri[0]); // Первая часть URL — это имя класса
-$action = null; // Изначально действие отсутствует
-$id = null; // Изначально ID отсутствует
+$action = 'get_all'; // Изначально действие - получение всех элементов
+$id = null;
 
-// Определяем действие и ID на основе URL и метода запроса
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = 'create';
-} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    $action = 'update';
-    if (isset($requestUri[1]) && is_numeric($requestUri[1])) {
-        $id = $requestUri[1]; // Получаем ID из URL
+$actionMethods = [
+    'POST' => 'create',
+    'PUT' => 'update',
+    'DELETE' => 'delete',
+    'GET' => 'get_by_id'
+];
+
+$requestMethod = $_SERVER['REQUEST_METHOD'];
+if (array_key_exists($requestMethod, $actionMethods)) {
+    $action = $actionMethods[$requestMethod];
+    if (in_array($action, ['update', 'delete', 'get_by_id'])) {
+        if (isset($requestUri[1]) && is_numeric($requestUri[1])) {
+            $id = $requestUri[1];
+        } else {
+            sendResponse(400, 'ID не указан для ' . ($action === 'update' ? 'обновления' : ($action === 'delete' ? 'удаления' : 'получения')));
+        }
     }
-} elseif (isset($requestUri[1])) {
-    if (is_numeric($requestUri[1])) { // Если второй элемент - это число, значит, это ID
-        $id = $requestUri[1];
-        $action = 'get_by_id';
-    } else { // Если это не число, то это действие
-        $action = $requestUri[1];
-    }
-} else {
-    $action = 'get_all'; // Если нет других действий, то по умолчанию - получение всех элементов
 }
 
-// Проверка доступных действий
 if (in_array($action, ['create', 'get_all', 'get_by_id', 'update', 'delete'])) {
-    echo handleRequest($className, $action, $DB, $id);
+    handleRequest($className, $action, $DB, $id);
 } else {
-    $status = 404;
-    http_response_code($status);
-    die(json_encode(['code' => $status, 'message' => 'Неизвестное действие']));
+    sendResponse(404, 'Неизвестное действие');
 }

@@ -10,11 +10,11 @@ class Qualification {
     }
 
     public function validation() {
-        $valid = [];
+        $errors = [];
         if (empty($this->name)) {
-            $valid['name'] = "Название специальности обязательно";
+            $errors['name'] = "Название специальности обязательно";
         }
-        return $valid;
+        return $errors;
     }
 
     public function create($DB) {
