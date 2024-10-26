@@ -66,9 +66,6 @@ function handleRequest($class, $action, $DB, $id = null)
             if ($_SERVER['REQUEST_METHOD'] != 'GET') {
                 sendResponse(405, 'Используйте метод GET');
             }
-            if ($id === null) {
-                sendResponse(400, 'ID не указан');
-            }
             $item = $class::get_by_id($DB, $id);
             if ($item) {
                 sendResponse(200, null, $item);
