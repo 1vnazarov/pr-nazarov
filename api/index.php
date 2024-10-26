@@ -130,6 +130,9 @@ if (array_key_exists($requestMethod, $actionMethods)) {
         sendResponse(400, 'ID не указан для ' . ($action === 'update' ? 'обновления' : ($action === 'delete' ? 'удаления' : 'получения')));
     }
 }
+else {
+    sendResponse(405, "Неизвестный метод");
+}
 
 if (in_array($action, ['create', 'get_all', 'get_by_id', 'update', 'delete'])) {
     handleRequest($className, $action, $id);
