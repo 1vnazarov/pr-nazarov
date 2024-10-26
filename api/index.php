@@ -9,6 +9,7 @@ require_once 'role.php';
 require_once 'user.php';
 
 $DB = connect();
+$requestMethod = $_SERVER['REQUEST_METHOD'];
 
 // Заголовки CORS
 header('Access-Control-Allow-Origin: *');
@@ -16,7 +17,7 @@ header('Access-Control-Allow-Headers: *');
 header('Access-Control-Allow-Methods: *');
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+if ($requestMethod == 'OPTIONS') {
     return http_response_code(200);
 }
 
@@ -31,15 +32,16 @@ function sendResponse($statusCode, $message = '', $data = [])
 }
 
 // Общая функция для обработки запросов
-function handleRequest($class, $action, $DB, $id = null)
+function handleRequest($class, $action, $id = null)
 {
+    global $DB, $requestMethod;
     if (!class_exists($class)) {
         sendResponse(404, 'Ресурс не найден');
     }
     $data = json_decode(file_get_contents("php://input"), true);
     switch ($action) {
         case 'create':
-            if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            if ($requestMethod != 'POST') {
                 sendResponse(405, 'Используйте метод POST');
             }
             $instance = new $class(!empty($_POST) ? $_POST : $data);
@@ -55,7 +57,7 @@ function handleRequest($class, $action, $DB, $id = null)
             break;
 
         case 'get_all':
-            if ($_SERVER['REQUEST_METHOD'] != 'GET') {
+            if ($requestMethod != 'GET') {
                 sendResponse(405, 'Используйте метод GET');
             }
             $items = $class::get_all($DB);
@@ -63,7 +65,7 @@ function handleRequest($class, $action, $DB, $id = null)
             break;
 
         case 'get_by_id':
-            if ($_SERVER['REQUEST_METHOD'] != 'GET') {
+            if ($requestMethod != 'GET') {
                 sendResponse(405, 'Используйте метод GET');
             }
             $item = $class::get_by_id($DB, $id);
@@ -75,7 +77,7 @@ function handleRequest($class, $action, $DB, $id = null)
             break;
 
         case 'update':
-            if ($_SERVER['REQUEST_METHOD'] != 'PATCH') {
+            if ($requestMethod != 'PATCH') {
                 sendResponse(405, 'Используйте метод PATCH');
             }
             $instance = new $class($data);
@@ -91,7 +93,7 @@ function handleRequest($class, $action, $DB, $id = null)
             break;
 
         case 'delete':
-            if ($_SERVER['REQUEST_METHOD'] != 'DELETE') {
+            if ($requestMethod != 'DELETE') {
                 sendResponse(405, 'Используйте метод DELETE');
             }
             if ($class::delete($DB, $id)) {
@@ -118,7 +120,6 @@ $actionMethods = [
     'GET' => 'get_by_id'
 ];
 
-$requestMethod = $_SERVER['REQUEST_METHOD'];
 if (array_key_exists($requestMethod, $actionMethods)) {
     $action = $actionMethods[$requestMethod];
     if (in_array($action, ['update', 'delete', 'get_by_id'])) {
@@ -131,7 +132,7 @@ if (array_key_exists($requestMethod, $actionMethods)) {
 }
 
 if (in_array($action, ['create', 'get_all', 'get_by_id', 'update', 'delete'])) {
-    handleRequest($className, $action, $DB, $id);
+    handleRequest($className, $action, $id);
 } else {
     sendResponse(404, 'Неизвестное действие');
 }
