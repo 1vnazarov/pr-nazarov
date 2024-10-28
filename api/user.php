@@ -20,6 +20,7 @@ class User extends BaseModel
         @$this->id_qualification = $request['id_qualification'];
         @$this->id_role = $request['id_role'] ?? 1;
         @$this->token = boolval($request['token']);
+        @$this->avatar = $request['avatar'];
 
         $this->validations = [
             'fullname' => [
@@ -51,8 +52,7 @@ class User extends BaseModel
         if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
             $avatar_filename = 'storage/avatar_' . $user_id . '_' . basename($_FILES['avatar']['name']);
             if (move_uploaded_file($_FILES['avatar']['tmp_name'], "../$avatar_filename")) {
-                die($avatar_filename);
-                return $avatar_filename;
+                return '/' . $avatar_filename;
             }
         }
         return null;
@@ -69,7 +69,7 @@ class User extends BaseModel
         );
         if ($user_id) {
             $avatarPath = $this->upload_avatar($user_id);
-            if ($avatarPath) self::query("UPDATE user SET avatar = ? WHERE user_id = ?", [$avatarPath, $user_id], "si");
+            if ($avatarPath) self::query("UPDATE user SET user_avatar = ? WHERE user_id = ?", [$avatarPath, $user_id], "si");
             return $user_id;
         }
         return false;
@@ -126,7 +126,7 @@ class User extends BaseModel
         }
 
         if ($this->avatar) {
-            $updates[] = "avatar = ?";
+            $updates[] = "user_avatar = ?";
             $params[] = $this->avatar;
             $types .= 's';
         }
