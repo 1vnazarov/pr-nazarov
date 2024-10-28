@@ -20,7 +20,6 @@ class User extends BaseModel
         @$this->id_qualification = $request['id_qualification'];
         @$this->id_role = $request['id_role'] ?? 1;
         @$this->token = boolval($request['token']);
-        @$this->avatar = $request['avatar'];
 
         $this->validations = [
             'fullname' => [
@@ -38,10 +37,6 @@ class User extends BaseModel
             'id_qualification' => [
                 'rule' => fn($value) => $this->id_role != self::query("SELECT role_id FROM role WHERE role_name = ?", ["Студент"], "s")['role_id'] || !empty($value),
                 'message' => "Специальность обязательна для студента"
-            ],
-            'avatar' => [
-                'rule' => fn($value) => !empty($value) && preg_match("/^storage\/avatar_\d+_.+$/", $value),
-                'message' => "Некорректный путь к аватару"
             ]
         ];
     }
@@ -55,7 +50,8 @@ class User extends BaseModel
     {
         if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
             $avatar_filename = 'storage/avatar_' . $user_id . '_' . basename($_FILES['avatar']['name']);
-            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $avatar_filename)) {
+            if (move_uploaded_file($_FILES['avatar']['tmp_name'], "../$avatar_filename")) {
+                die($avatar_filename);
                 return $avatar_filename;
             }
         }
