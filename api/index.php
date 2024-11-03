@@ -105,9 +105,7 @@ function handleRequest($class, $action, $id = null)
 }
 
 // Обработка маршрутов
-$queryString = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
-parse_str($queryString, $queryParams);
-$requestUri = explode('/', trim($queryParams['q'], '/'));
+$requestUri = array_slice(explode('/', $_SERVER['REQUEST_URI']), 2);
 $className = ucfirst($requestUri[0]); // Первая часть URL — это имя класса
 $action = 'get_all'; // Изначально действие - получение всех элементов
 $id = null;
