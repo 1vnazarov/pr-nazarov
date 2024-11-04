@@ -1,7 +1,5 @@
 <?php
 
-ob_start();
-
 require_once 'diploma.php';
 require_once 'qualification.php';
 require_once 'role.php';
@@ -22,7 +20,6 @@ if ($requestMethod == 'OPTIONS') {
 // Функция для отправки ответа
 function sendResponse($statusCode, $message = '', $data = [])
 {
-    ob_clean();
     http_response_code($statusCode);
     if ($message) $data['message'] = $message;
     echo json_encode($data);
