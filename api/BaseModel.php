@@ -13,6 +13,18 @@ abstract class BaseModel
         return get_called_class()::tableName() . '_id';
     }
 
+    public static function auth($userId)
+    {
+        $token = null;
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            $matches = [];
+            if (preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+                $token = $matches[1];
+            }
+        }
+        $userToken = self::query("SELECT user_token FROM user WHERE user_id = ?", [$userId], 'i')['user_token'] ?? null;
+        return !empty($token) && $token === $userToken;
+    }
     
     protected static function query($query, $params = [], $types = "") {
         $DB = connect();

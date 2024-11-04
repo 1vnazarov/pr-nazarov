@@ -26,6 +26,11 @@ function sendResponse($statusCode, $message = '', $data = [])
     exit;
 }
 
+function isAllowedRequest($class, $id) {
+    $class = new $class([]);
+    if ($class::class == "User" && !$class::auth($id)) sendResponse(403, 'Операция запрещена');
+}
+
 // Общая функция для обработки запросов
 function handleRequest($class, $action, $id = null)
 {
@@ -68,6 +73,7 @@ function handleRequest($class, $action, $id = null)
             if ($requestMethod != 'PATCH') {
                 sendResponse(405, 'Используйте метод PATCH');
             }
+            isAllowedRequest($class, $id);
             $instance = new $class($data);
             $errors = $instance->validation(false);
             if ($errors) {
@@ -76,7 +82,7 @@ function handleRequest($class, $action, $id = null)
             if ($instance->update($id)) {
                 sendResponse(204);
             } else {
-                sendResponse(507, 'Не удалось обновить данные');
+                sendResponse(400, 'Не удалось обновить данные');
             }
             break;
 
@@ -84,6 +90,7 @@ function handleRequest($class, $action, $id = null)
             if ($requestMethod != 'DELETE') {
                 sendResponse(405, 'Используйте метод DELETE');
             }
+            isAllowedRequest($class, $id);
             if ($class::delete($id)) {
                 sendResponse(204);
             } else {

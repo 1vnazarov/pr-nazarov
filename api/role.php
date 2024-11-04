@@ -22,6 +22,7 @@ class Role extends BaseModel {
     }
 
     public function update($id) {
+        if (empty($this->name)) return false;
         return self::query("UPDATE role SET role_name = ? WHERE role_id = ?", [$this->name, $id], "si");
     }
 }

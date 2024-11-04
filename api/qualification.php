@@ -23,6 +23,7 @@ class Qualification extends BaseModel {
     }
 
     public function update($id) {
+        if (empty($this->name)) return false;
         return self::query("UPDATE qualification SET qualification_name = ? WHERE qualification_id = ?", [$this->name, $id], "si");
     }
 }
