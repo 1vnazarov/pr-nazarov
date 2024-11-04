@@ -11,7 +11,6 @@ class User extends BaseModel
     public $id_role;
     public $token;
     public $avatar;
-
     public function __construct($request)
     {
         @$this->fullname = $request['fullname'];
@@ -22,23 +21,15 @@ class User extends BaseModel
         @$this->token = boolval($request['token']);
         @$this->avatar = $request['avatar'];
 
-        $this->validations = [
-            'fullname' => [
-                'rule' => fn($value) => !empty($value) && preg_match("/^[A-Za-zА-Яа-яЁё\s\-]+$/u", $value),
-                'message' => "Некорректные ФИО"
-            ],
-            'email' => [
-                'rule' => fn($value) => !empty($value) && filter_var($value, FILTER_VALIDATE_EMAIL) && self::query("SELECT COUNT(*) AS count FROM user WHERE user_email = ?", [$value], "s")['count'] == 0,
-                'message' => "Некорректный email или уже занят"
-            ],
-            'password' => [
-                'rule' => fn($value) => !empty($value) && preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?.,&^_])[A-Za-z\d!?.,&^_]{8,}$/u", $value),
-                'message' => "Пароль должен содержать минимум 8 символов, одну заглавную букву, одну строчную букву, одну цифру и один из спец.символов"
-            ],
-            'id_qualification' => [
-                'rule' => fn($value) => $this->id_role != self::query("SELECT role_id FROM role WHERE role_name = ?", ["Студент"], "s")['role_id'] || !empty($value),
-                'message' => "Специальность обязательна для студента"
-            ]
+        $this->fields = [
+            "email" => "user_email"
+        ];
+
+        $this->rules = [
+            'fullname' => [['required', 'ФИО обязательно'], ['pattern:/^[A-Za-zА-Яа-яЁё\s\-]+$/u', "Некорректные ФИО"]],
+            'email' => ['required', 'email', 'unique'],
+            'password' => [['required', 'Пароль обязателен'], ['pattern:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!?.,&^_])[A-Za-z\d!?.,&^_]{8,}$/u', "Пароль должен содержать минимум 8 символов, одну заглавную букву, одну строчную букву, одну цифру и один из спец.символов"]],
+            'id_qualification' => [[fn($key, $value) => $this->id_role == self::query("SELECT role_id FROM role WHERE role_name = ?", ["Студент"], "s")['role_id'] ? !empty($value) : true, "Специальность обязательна для студента"]]
         ];
     }
 
@@ -73,16 +64,6 @@ class User extends BaseModel
             return $user_id;
         }
         return false;
-    }
-
-    public static function get_all()
-    {
-        return self::query("SELECT * FROM user");
-    }
-
-    public static function get_by_id($id)
-    {
-        return self::query("SELECT * FROM user WHERE user_id = ?", [$id], "i");
     }
 
     public function update($id)
@@ -138,10 +119,5 @@ class User extends BaseModel
 
         $sql = "UPDATE user SET " . implode(', ', $updates) . " WHERE user_id = ?";
         return self::query($sql, $params, $types);
-    }
-
-    public static function delete($id)
-    {
-        return self::query("DELETE FROM user WHERE user_id = ?", [$id], "i");
     }
 }

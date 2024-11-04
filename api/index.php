@@ -56,18 +56,11 @@ function handleRequest($class, $action, $id = null)
             break;
 
         case 'get_all':
-            if ($requestMethod != 'GET') {
-                sendResponse(405, 'Используйте метод GET');
-            }
-            $items = $class::get_all();
-            sendResponse(200, null, $items);
-            break;
-
         case 'get_by_id':
             if ($requestMethod != 'GET') {
                 sendResponse(405, 'Используйте метод GET');
             }
-            $item = $class::get_by_id($id);
+            $item = $class::get($id);
             if ($item) {
                 sendResponse(200, null, $item);
             } else {

@@ -22,31 +22,13 @@ class Diploma extends BaseModel {
         @$this->diploma_mark = $request['diploma_mark'];
         @$this->diploma_production_year = $request['diploma_production_year'];
         
-        $this->validations = [
-            'diploma_topic' => [
-                'rule' => fn($value) => !empty($value),
-                'message' => "Тема диплома обязательна"
-            ],
-            'diploma_abstract' => [
-                'rule' => fn($value) => !empty($value),
-                'message' => "Аннотация диплома обязательна"
-            ],
-            'id_student' => [
-                'rule' => fn($value) => !empty($value) && filter_var($value, FILTER_VALIDATE_INT),
-                'message' => "ID студента обязательно и должно быть целым числом"
-            ],
-            'id_thesis_advisor' => [
-                'rule' => fn($value) => !empty($value) && filter_var($value, FILTER_VALIDATE_INT),
-                'message' => "ID дипломного руководителя обязательно и должно быть целым числом"
-            ],
-            'diploma_mark' => [
-                'rule' => fn($value) => in_array($value, ['3', '4', '5']),
-                'message' => "Оценка диплома должна быть 3, 4 или 5"
-            ],
-            'diploma_production_year' => [
-                'rule' => fn($value) => !empty($value) && preg_match('/^\d{4}$/', $value),
-                'message' => "Год защиты диплома обязателен и должен быть в формате YYYY"
-            ]
+        $this->rules = [
+            'diploma_topic' => [['required', "Тема диплома обязательна"]],
+            'diploma_abstract' => [['required', "Аннотация диплома обязательна"]],
+            'id_student' => [['required', "ID студента обязательно"], ['int', "ID студента должно быть числом"]],
+            'id_thesis_advisor' => [['required', "ID дипломного руководителя обязательно"], ['int', "ID дипломного руководителя должно быть числом"]],
+            'diploma_mark' => [[fn($key, $value) => in_array($value, ['3', '4', '5']), "Оценка диплома должна быть 3, 4 или 5"]],
+            'diploma_production_year' => [['required', "Год защиты диплома обязателен"], ['patterm:/^\d{4}$/', "Год защиты диплома должен быть в формате YYYY"]]
         ];
     }
 
@@ -54,14 +36,6 @@ class Diploma extends BaseModel {
         return self::query("INSERT INTO diploma (diploma_topic, diploma_abstract, diploma_text_url, id_student, id_thesis_advisor, diploma_mark, diploma_production_year) VALUES (?, ?, ?, ?, ?, ?, ?)", 
             [$this->diploma_topic, $this->diploma_abstract, $this->diploma_text_url, $this->id_student, $this->id_thesis_advisor, $this->diploma_mark, $this->diploma_production_year], 
             "sssisii");
-    }
-
-    public static function get_all() {
-        return self::query("SELECT * FROM diploma");
-    }
-
-    public static function get_by_id($id) {
-        return self::query("SELECT * FROM diploma WHERE diploma_id = ?", [$id], "i");
     }
 
     public function update($id) {
@@ -112,9 +86,5 @@ class Diploma extends BaseModel {
 
         $sql = "UPDATE diploma SET " . implode(', ', $updates) . " WHERE diploma_id = ?";
         return self::query($sql, $params, $types);
-    }    
-
-    public static function delete($id) {
-        return self::query("DELETE FROM diploma WHERE diploma_id = ?", [$id], "i");
     }
 }
