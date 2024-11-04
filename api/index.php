@@ -42,7 +42,7 @@ function handleRequest($class, $action, $id = null)
             if ($requestMethod != 'POST') {
                 sendResponse(405, 'Используйте метод POST');
             }
-            $instance = new $class(!empty($_POST) ? $_POST : $data);
+            $instance = new $class($_POST ?? $data);
             $errors = $instance->validation();
             if ($errors) {
                 sendResponse(422, 'Ошибка валидации', ['errors' => $errors]);
