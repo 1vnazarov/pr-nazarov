@@ -55,8 +55,7 @@ function handleRequest($class, $action, $id = null)
             }
             break;
 
-        case 'get_all':
-        case 'get_by_id':
+        case 'get':
             if ($requestMethod != 'GET') {
                 sendResponse(405, 'Используйте метод GET');
             }
@@ -100,33 +99,24 @@ function handleRequest($class, $action, $id = null)
 // Обработка маршрутов
 $requestUri = array_slice(explode('/', $_SERVER['REQUEST_URI']), 2);
 $className = ucfirst($requestUri[0]); // Первая часть URL — это имя класса
-$action = 'get_all'; // Изначально действие - получение всех элементов
+$action = 'get'; // Изначально действие - получение
 $id = null;
 
 $actionMethods = [
+     'GET' => 'get',
     'POST' => 'create',
     'PATCH' => 'update',
     'DELETE' => 'delete',
-    'GET' => 'get_all'
 ];
 
-if (array_key_exists($requestMethod, $actionMethods)) {
-    $action = $actionMethods[$requestMethod];
-    if (isset($requestUri[1]) && is_numeric($requestUri[1])) {
-        $id = $requestUri[1];
-        if ($action === 'get_all') {
-            $action = 'get_by_id';
-        }
-    } elseif (in_array($action, ['update', 'delete', 'get_by_id'])) {
-        sendResponse(400, 'ID не указан для ' . ($action === 'update' ? 'обновления' : ($action === 'delete' ? 'удаления' : 'получения')));
-    }
-}
-else {
-    sendResponse(405, "Неизвестный метод");
+if (!array_key_exists($requestMethod, $actionMethods)) sendResponse(405, "Неизвестный метод");
+$action = $actionMethods[$requestMethod];
+if (isset($requestUri[1]) && is_numeric($requestUri[1])) {
+    $id = $requestUri[1];
+    if ($action === 'create') sendResponse(400, 'ID не ожидалось');
+} elseif (in_array($action, ['update', 'delete'])) {
+    sendResponse(400, 'ID не указан для ' . ($action === 'update' ? 'обновления' : ($action === 'delete' ? 'удаления' : 'получения')));
 }
 
-if (in_array($action, ['create', 'get_all', 'get_by_id', 'update', 'delete'])) {
-    handleRequest($className, $action, $id);
-} else {
-    sendResponse(404, 'Неизвестное действие');
-}
+if (!in_array($action, array_values($actionMethods))) sendResponse(404, 'Неизвестное действие');
+handleRequest($className, $action, $id);

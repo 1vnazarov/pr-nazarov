@@ -99,8 +99,7 @@ abstract class BaseModel
     }
 
     public static function delete($id) {
-        if (!is_numeric($id)) return false;
-        if (!self::isTableExists()) return false;
+        if (!is_numeric($id) || !self::isTableExists()) return false;
         $table = get_called_class()::tableName();
         $id_column = get_called_class()::primaryKey();
         return self::query("DELETE FROM $table WHERE $id_column = ?", [$id], "i");
